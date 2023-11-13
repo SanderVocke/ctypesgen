@@ -95,14 +95,17 @@ class LibraryLoader:
         """Given the name of a library, load it."""
         paths = self.getpaths(libname)
 
+        errors = dict()
         for path in paths:
             # noinspection PyBroadException
             try:
                 return self.Lookup(path)
-            except Exception:  # pylint: disable=broad-except
+            except Exception as e:  # pylint: disable=broad-except
+                errors[path] = str(e)
                 pass
 
-        raise ImportError("Could not load %s." % libname)
+        formatted_errors = '\n'.join(['-  {}: {}'.format(k, v) for k,v in errors.items()])
+        raise ImportError("Could not load {}. Errors per tried path:\n{}".format(libname, formatted_errors))
 
     def getpaths(self, libname):
         """Return a list of paths where the library might be found."""
